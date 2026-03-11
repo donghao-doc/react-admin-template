@@ -1,0 +1,29 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f5f7fa;
+}
+
+.login-page__card {
+  width: 100%;
+  max-width: 420px;
+
+  .ant-card-body {
+    padding: 32px;
+  }
+}
+
+.login-page__content {
+  width: 100%;
+}
+
+.login-page__title {
+  margin: 0;
+}
+
+.login-page__submit {
+  margin-bottom: 0;
+}

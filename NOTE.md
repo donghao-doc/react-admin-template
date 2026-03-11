@@ -33,3 +33,45 @@ const router = createBrowserRouter([
 
 - 项目已经具备基础页面切换能力。
 - 后续可以在现有路由表上继续接入布局路由、登录守卫、权限路由和面包屑。
+
+## 02. 完成登录页基础结构与交互
+
+### 解决的问题
+
+- 模板项目还没有一个可用的后台登录页，后续无法在此基础上接入认证流程。
+- 开发阶段频繁手输测试账号效率低，需要一个更适合模板项目演示和联调的快捷交互。
+
+### 实现方案
+
+- 基于 `Ant Design` 的 `Card`、`Form`、`Input`、`Button`、`Checkbox` 组合登录页基础结构。
+- 提供多组演示账号按钮，点击后自动填充账号和密码。
+- 登录提交阶段先模拟异步过程，并在提交完成后跳转到 `/dashboard`，为后续接接口预留替换点。
+- 页面样式保持轻量，只使用基础布局和少量容器样式，避免过早投入复杂视觉设计。
+
+### 关键代码片段
+
+```tsx
+const demoAccounts: DemoAccount[] = [
+  {
+    key: 'admin',
+    label: '超级管理员',
+    username: 'admin',
+    password: '123456',
+    description: '拥有完整菜单和按钮权限',
+  },
+]
+
+function handleFillAccount(account: DemoAccount) {
+  form.setFieldsValue({
+    username: account.username,
+    password: account.password,
+    remember: true,
+  })
+  setActiveAccountKey(account.key)
+}
+```
+
+### 当前收益
+
+- 项目已经具备可交互的登录页原型。
+- 后续接入 mock 登录接口、token 持久化和登录守卫时，只需要在现有提交逻辑上继续扩展。
