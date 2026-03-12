@@ -188,3 +188,39 @@ export const useAuthStore = create<AuthStore>()(
 - 项目已经具备统一的 token 状态入口。
 - `types` 目录可以继续保持“只放公共类型”的边界。
 - 后续接 mock 登录接口、请求拦截器和路由守卫时，可以直接复用当前 store 继续扩展。
+
+## 06. 补充公共类型并准备 mock 原始数据
+
+### 解决的问题
+
+- 项目后续要接登录、用户信息、菜单树、按钮权限等 mock 接口，但目前缺少统一的公共领域类型。
+- 如果在写 mock 接口时临时拼接数据结构，后面很容易出现 store、接口、页面之间字段定义不一致的问题。
+
+### 实现方案
+
+- 在 `src/types` 中补充公共领域类型，只放会被多个模块复用的定义，例如登录参数、用户信息、菜单树、权限码等。
+- 新增 `mock/data.ts`，集中维护演示账号、token、用户信息、菜单树、按钮权限这类基础原始数据。
+- mock 数据按照“账号 -> token -> 用户/菜单/权限”关系组织，便于后续直接拼装 mock 接口。
+
+### 关键代码片段
+
+```ts
+export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
+  admin: [
+    {
+      key: 'dashboard',
+      path: '/dashboard',
+      name: 'Dashboard',
+      meta: {
+        title: '工作台',
+        icon: 'DashboardOutlined',
+      },
+    },
+  ],
+}
+```
+
+### 当前收益
+
+- 项目已经具备后续 mock 接口开发所需的数据基础。
+- `types` 目录的职责进一步明确为“公共领域类型定义”。
