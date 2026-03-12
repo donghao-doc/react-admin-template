@@ -110,3 +110,40 @@ function handleFillAccount(account: DemoAccount) {
 
 - 项目已经具备可直接使用的基础异常页。
 - 后续可以继续在此基础上扩展 `403`、`500` 等其他异常页面。
+
+## 04. 完成管理后台基础布局结构
+
+### 解决的问题
+
+- 当前 `dashboard` 页面是独立路由，缺少后台项目常见的侧边栏、头部和内容容器。
+- 后续如果要继续接菜单权限、面包屑、主题切换和用户信息展示，需要先有稳定的布局壳层。
+
+### 实现方案
+
+- 新增 `layout` 目录作为后台外壳层，使用 `Ant Design Layout` 组合侧边栏、头部和内容区。
+- 使用 `react-router-dom` 的嵌套路由，让 `/dashboard` 成为布局下的子路由，内容区通过 `Outlet` 展示页面。
+- 菜单先保留静态配置，只提供 `dashboard` 入口，避免在这一阶段提前引入动态菜单复杂度。
+
+### 关键代码片段
+
+```tsx
+{
+  path: '/',
+  element: <Layout />,
+  children: [
+    {
+      index: true,
+      element: <Navigate to="/dashboard" replace />,
+    },
+    {
+      path: 'dashboard',
+      element: <Dashboard />,
+    },
+  ],
+}
+```
+
+### 当前收益
+
+- 项目已经具备经典管理后台的基础页面骨架。
+- 后续可以直接在布局层继续接入菜单权限、面包屑、头部用户区和主题切换。
