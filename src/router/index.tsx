@@ -6,10 +6,16 @@ const AdminLayout = lazy(() => import('@/layout'))
 const Login = lazy(() => import('@/pages/login'))
 const NotFound = lazy(() => import('@/pages/404'))
 
+import { ProtectedRoute, PublicRoute } from './guard'
+
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -23,7 +29,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <Login />,
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
   },
   {
     path: '/404',
