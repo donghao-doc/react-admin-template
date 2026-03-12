@@ -1,11 +1,9 @@
 import { get, post } from '@/http'
 import type {
   ApiResponse,
+  AuthProfile,
   LoginPayload,
   LoginResult,
-  MenuItem,
-  PermissionCode,
-  UserInfo,
 } from '@/types'
 
 /**
@@ -16,22 +14,8 @@ export function loginApi(data: LoginPayload): Promise<ApiResponse<LoginResult>> 
 }
 
 /**
- * 获取用户信息
+ * 获取登录后初始化数据
  */
-export function getUserInfoApi(): Promise<ApiResponse<UserInfo>> {
-  return get<UserInfo>('/api/auth/user-info')
-}
-
-/**
- * 获取用户菜单树
- */
-export function getMenusApi(): Promise<ApiResponse<MenuItem[]>> {
-  return get<MenuItem[]>('/api/auth/menus')
-}
-
-/**
- * 获取用户按钮权限
- */
-export function getPermissionsApi(): Promise<ApiResponse<PermissionCode[]>> {
-  return get<PermissionCode[]>('/api/auth/permissions')
+export function getProfileApi(): Promise<ApiResponse<AuthProfile>> {
+  return get<AuthProfile>('/api/auth/profile')
 }

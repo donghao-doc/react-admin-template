@@ -1,7 +1,11 @@
-import * as Mock from 'mockjs'
+import * as MockNs from 'mockjs'
 import type { MockMethod, Recordable } from 'vite-plugin-mock'
 
-import { mockAccounts, mockMenusByRole, mockPermissionsByToken, mockUsers } from './data'
+import { mockAccounts, mockProfilesByToken } from './data'
+
+const Mock = (
+  MockNs as typeof MockNs & { default?: typeof MockNs }
+).default ?? MockNs
 
 interface MockRequestOptions {
   url: Recordable
@@ -46,14 +50,14 @@ function getToken(headers: Record<string, unknown>) {
 }
 
 /**
- * 根据 token 获取用户信息
+ * 根据 token 获取登录后的上下文数据
  */
-function getUserByToken(token: string) {
+function getProfileByToken(token: string) {
   if (!token) {
     return undefined
   }
 
-  return mockUsers[token]
+  return mockProfilesByToken[token]
 }
 
 const mockList: MockMethod[] = [
@@ -82,48 +86,18 @@ const mockList: MockMethod[] = [
     },
   },
   {
-    url: '/api/auth/user-info',
+    url: '/api/auth/profile',
     method: 'get',
     timeout: 300,
     response: ({ headers }: MockRequestOptions) => {
       const token = getToken(headers)
-      const user = getUserByToken(token)
+      const profile = getProfileByToken(token)
 
-      if (!user) {
+      if (!profile) {
         return createErrorResponse('登录状态无效，请重新登录', 401)
       }
 
-      return createSuccessResponse(user)
-    },
-  },
-  {
-    url: '/api/auth/menus',
-    method: 'get',
-    timeout: 300,
-    response: ({ headers }: MockRequestOptions) => {
-      const token = getToken(headers)
-      const user = getUserByToken(token)
-
-      if (!user) {
-        return createErrorResponse('登录状态无效，请重新登录', 401)
-      }
-
-      return createSuccessResponse(mockMenusByRole[user.role])
-    },
-  },
-  {
-    url: '/api/auth/permissions',
-    method: 'get',
-    timeout: 300,
-    response: ({ headers }: MockRequestOptions) => {
-      const token = getToken(headers)
-      const permissions = mockPermissionsByToken[token]
-
-      if (!permissions) {
-        return createErrorResponse('登录状态无效，请重新登录', 401)
-      }
-
-      return createSuccessResponse(permissions)
+      return createSuccessResponse(profile)
     },
   },
 ]

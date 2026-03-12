@@ -1,4 +1,5 @@
 import type {
+  AuthProfile,
   LoginPayload,
   LoginResult,
   MenuItem,
@@ -68,15 +69,6 @@ export const mockUsers: Record<string, UserInfo> = {
     nickname: '超级管理员',
     avatar: '',
     role: 'admin',
-    permissions: [
-      'dashboard:view',
-      'system:user:view',
-      'system:user:create',
-      'system:user:edit',
-      'system:user:delete',
-      'content:view',
-      'content:publish',
-    ],
   },
   token_editor: {
     id: 'u_editor',
@@ -84,12 +76,6 @@ export const mockUsers: Record<string, UserInfo> = {
     nickname: '内容运营',
     avatar: '',
     role: 'editor',
-    permissions: [
-      'dashboard:view',
-      'system:user:view',
-      'content:view',
-      'content:publish',
-    ],
   },
   token_visitor: {
     id: 'u_visitor',
@@ -97,7 +83,6 @@ export const mockUsers: Record<string, UserInfo> = {
     nickname: '只读访客',
     avatar: '',
     role: 'visitor',
-    permissions: ['dashboard:view', 'system:user:view', 'content:view'],
   },
 }
 
@@ -182,7 +167,41 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
  * 按 token 提供按钮权限列表
  */
 export const mockPermissionsByToken: Record<string, PermissionCode[]> = {
-  token_admin: mockUsers.token_admin.permissions,
-  token_editor: mockUsers.token_editor.permissions,
-  token_visitor: mockUsers.token_visitor.permissions,
+  token_admin: [
+    'dashboard:view',
+    'system:user:view',
+    'system:user:create',
+    'system:user:edit',
+    'system:user:delete',
+    'content:view',
+    'content:publish',
+  ],
+  token_editor: [
+    'dashboard:view',
+    'system:user:view',
+    'content:view',
+    'content:publish',
+  ],
+  token_visitor: ['dashboard:view', 'system:user:view', 'content:view'],
+}
+
+/**
+ * 登录后初始化所需的聚合数据
+ */
+export const mockProfilesByToken: Record<string, AuthProfile> = {
+  token_admin: {
+    userInfo: mockUsers.token_admin,
+    menus: mockMenusByRole.admin,
+    permissions: mockPermissionsByToken.token_admin,
+  },
+  token_editor: {
+    userInfo: mockUsers.token_editor,
+    menus: mockMenusByRole.editor,
+    permissions: mockPermissionsByToken.token_editor,
+  },
+  token_visitor: {
+    userInfo: mockUsers.token_visitor,
+    menus: mockMenusByRole.visitor,
+    permissions: mockPermissionsByToken.token_visitor,
+  },
 }
