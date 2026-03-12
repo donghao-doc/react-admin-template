@@ -1,5 +1,4 @@
 import {
-  DesktopOutlined,
   DownOutlined,
   LogoutOutlined,
   UserOutlined,
@@ -9,21 +8,75 @@ import type { MenuProps } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuthStore, useProfileStore } from '@/store'
+import type { MenuItem } from '@/types'
 
+import { menuIconMap } from './menu-icons'
 import './index.scss'
 
 const { Header, Sider, Content } = Layout
 
 /**
- * 当前阶段先使用静态菜单结构，后续再接入菜单权限和动态路由
+ * 将后端返回的菜单树转换为 antd Menu 的数据结构
  */
-const menuItems = [
-  {
-    key: '/dashboard',
-    icon: <DesktopOutlined />,
-    label: '工作台',
-  },
-]
+function transformMenuItems(menus: MenuItem[]): MenuProps['items'] {
+  return menus.map((menu) => ({
+    key: menu.path,
+    icon: menu.meta.icon ? menuIconMap[menu.meta.icon] : undefined,
+    label: menu.meta.title,
+    children: menu.children?.length ? transformMenuItems(menu.children) : undefined,
+  }))
+}
+
+/**
+ * 递归拍平菜单树，便于根据当前路由匹配菜单节点
+ */
+function flattenMenus(menus: MenuItem[]): MenuItem[] {
+  return menus.flatMap((menu) => {
+    if (!menu.children?.length) {
+      return [menu]
+    }
+
+    return [menu, ...flattenMenus(menu.children)]
+  })
+}
+
+/**
+ * 查找与当前 pathname 最匹配的菜单节点，优先使用更长的路径
+ */
+function findMatchedMenu(pathname: string, menus: MenuItem[]) {
+  return flattenMenus(menus)
+    .filter((menu) => pathname === menu.path || pathname.startsWith(`${menu.path}/`))
+    .sort((prev, next) => next.path.length - prev.path.length)[0]
+}
+
+/**
+ * 根据当前路由查找需要展开的父级菜单路径
+ */
+function findOpenKeys(pathname: string, menus: MenuItem[], parentPaths: string[] = []): string[] {
+  for (const menu of menus) {
+    const currentPaths = [...parentPaths, menu.path]
+
+    if (pathname === menu.path || pathname.startsWith(`${menu.path}/`)) {
+      if (!menu.children?.length) {
+        return parentPaths
+      }
+
+      const childOpenKeys = findOpenKeys(pathname, menu.children, currentPaths)
+
+      return childOpenKeys.length ? childOpenKeys : parentPaths
+    }
+
+    if (menu.children?.length) {
+      const childOpenKeys = findOpenKeys(pathname, menu.children, currentPaths)
+
+      if (childOpenKeys.length) {
+        return childOpenKeys
+      }
+    }
+  }
+
+  return []
+}
 
 function AdminLayout() {
   const location = useLocation()
@@ -31,6 +84,10 @@ function AdminLayout() {
   const clearToken = useAuthStore((state) => state.clearToken)
   const clearProfile = useProfileStore((state) => state.clearProfile)
   const userInfo = useProfileStore((state) => state.userInfo)
+  const menus = useProfileStore((state) => state.menus)
+  const matchedMenu = findMatchedMenu(location.pathname, menus)
+  const openKeys = findOpenKeys(location.pathname, menus)
+  const menuItems = transformMenuItems(menus)
 
   const userDropdownItems: MenuProps['items'] = [
     {
@@ -81,8 +138,9 @@ function AdminLayout() {
         <Menu
           className="admin-layout__menu"
           items={menuItems}
+          defaultOpenKeys={openKeys}
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={matchedMenu ? [matchedMenu.path] : []}
           theme="dark"
           onClick={({ key }) => navigate(key)}
         />
@@ -91,7 +149,7 @@ function AdminLayout() {
       <Layout>
         <Header className="admin-layout__header">
           <Typography.Title className="admin-layout__header-title" level={5}>
-            工作台
+            {matchedMenu?.meta.title ?? '管理后台'}
           </Typography.Title>
 
           <Dropdown
