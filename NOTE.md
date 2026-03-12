@@ -224,3 +224,43 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 
 - 项目已经具备后续 mock 接口开发所需的数据基础。
 - `types` 目录的职责进一步明确为“公共领域类型定义”。
+
+## 07. 接入基础 mock 接口能力
+
+### 解决的问题
+
+- 虽然已经准备了 mock 原始数据，但浏览器里还没有真实可请求的 mock 接口。
+- 后续登录、获取用户信息、菜单树、按钮权限等流程，必须先有一层稳定的接口入口，才能在 `Network` 中看到请求并逐步替换页面逻辑。
+
+### 实现方案
+
+- 在 `mock/index.ts` 中基于 `vite-plugin-mock` 定义 mock 接口列表。
+- 在接口响应里结合 `mockjs` 生成统一的响应结构，例如 `requestId`、时间戳等动态字段。
+- 在 `vite.config.ts` 中接入 `viteMockServe`，仅在开发环境启用 mock 服务。
+
+### 关键代码片段
+
+```ts
+{
+  url: '/api/auth/login',
+  method: 'post',
+  response: ({ body }) => {
+    const matchedAccount = mockAccounts.find((account) => {
+      return account.username === body.username && account.password === body.password
+    })
+
+    if (!matchedAccount) {
+      return createErrorResponse('账号或密码错误', 10001)
+    }
+
+    return createSuccessResponse({
+      token: matchedAccount.token,
+    })
+  },
+}
+```
+
+### 当前收益
+
+- 开发环境已经具备真实可访问的认证类 mock 接口。
+- 后续可以直接把登录页、用户信息加载、菜单和按钮权限请求接到当前 mock 接口上。
