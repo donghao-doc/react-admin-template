@@ -8,12 +8,7 @@ import axios, {
 import { useAuthStore } from '@/store'
 import type { ApiResponse } from '@/types'
 import type { RequestConfig } from './types'
-
-/**
- * 判断当前请求失败时是否需要弹出错误提示
- */
-const shouldShowErrorMessage = (config?: RequestConfig) =>
-  config?.showErrorMessage !== false
+import { handleUnauthorized, shouldShowErrMsg } from './utils'
 
 /**
  * 统一 axios 实例
@@ -65,8 +60,13 @@ http.interceptors.response.use(
 
     // 业务失败
     // 如果当前请求没有关闭错误提示，就弹出后端 message
-    if (responseData.message && shouldShowErrorMessage(response.config as RequestConfig | undefined)) {
+    if (responseData.message && shouldShowErrMsg(response.config as RequestConfig | undefined)) {
       message.error(responseData.message)
+    }
+
+    // 登录态已失效
+    if (responseData.code === 401) {
+      handleUnauthorized()
     }
 
     // reject 的是后端返回的业务响应对象
@@ -75,7 +75,7 @@ http.interceptors.response.use(
   },
   // HTTP 请求异常的回调（状态码非 2xx）
   (error: AxiosError<ApiResponse<null>>) => {
-    if (!shouldShowErrorMessage(error.config as RequestConfig | undefined)) {
+    if (!shouldShowErrMsg(error.config as RequestConfig | undefined)) {
       return Promise.reject(error)
     }
 
@@ -83,6 +83,11 @@ http.interceptors.response.use(
     // 但 HTTP 状态码不是 2xx，所以 axios 仍然把它当作错误
     // 优先使用后端返回的 message，其次才回退到 axios 自带的错误信息
     if (error.response) {
+      // 服务端直接返回了 HTTP 401，说明当前请求已被鉴权层拦截，登录态已失效
+      if (error.response.status === 401) {
+        handleUnauthorized()
+      }
+
       const responseData = error.response.data
       const errorMessage = responseData?.message || error.message || '请求失败'
       message.error(errorMessage)
