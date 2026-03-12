@@ -337,3 +337,22 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 
 - 当前认证链路相关类型已经集中在一个文件中，更方便统一维护。
 - 后续如果权限或菜单领域真正复杂起来，再从 `auth.ts` 中拆分出去也更自然。
+
+## 12. 接通登录与 profile 初始化链路
+
+### 解决的问题
+
+- 当前登录页虽然已经具备界面和交互，但还没有真正接入登录接口，也不会把 token 和登录上下文写入状态。
+- 页面刷新后虽然 token 能通过 `persist` 恢复，但还缺少自动重新拉取 `profile` 的初始化逻辑。
+
+### 实现方案
+
+- 新增 `profile store`，统一承载 `userInfo`、`menus`、`permissions` 以及 `profileStatus`。
+- 在 `src/hooks/init-profile.ts` 中实现 `useInitProfile`，基于 token 自动拉取 `profile` 并写入 store。
+- 登录页改为调用 `loginApi`，成功后写入 token，并清空旧的 profile 以触发新的初始化流程。
+- 在 `App.tsx` 中挂载 `useInitProfile`，让跳转后和刷新页面后的初始化逻辑保持一致。
+
+### 当前收益
+
+- 登录链路已经接通到真实的 `http + mock` 接口。
+- 页面刷新后能够基于已持久化的 token 自动重新拉取登录上下文数据。

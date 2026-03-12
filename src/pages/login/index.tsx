@@ -3,13 +3,11 @@ import { Button, Card, Checkbox, Form, Input, Space, Typography } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import './index.scss'
+import { loginApi } from '@/api'
+import { useAuthStore, useProfileStore } from '@/store'
+import type { LoginPayload } from '@/types'
 
-interface LoginFormValues {
-  username: string
-  password: string
-  remember: boolean
-}
+import './index.scss'
 
 interface DemoAccount {
   key: string
@@ -44,9 +42,11 @@ const demoAccounts: DemoAccount[] = [
 
 function Login() {
   const navigate = useNavigate()
-  const [form] = Form.useForm<LoginFormValues>()
+  const [form] = Form.useForm<LoginPayload>()
   const [submitting, setSubmitting] = useState(false)
   const [activeAccountKey, setActiveAccountKey] = useState<string>(demoAccounts[0].key)
+  const setToken = useAuthStore((state) => state.setToken)
+  const clearProfile = useProfileStore((state) => state.clearProfile)
 
   /**
    * 点击演示账号后直接回填表单，方便测试
@@ -63,15 +63,19 @@ function Login() {
   /**
    * 登录提交
    */
-  async function handleSubmit() {
+  async function handleSubmit(values: LoginPayload) {
     setSubmitting(true)
 
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 600)
-    })
+    try {
+      const res = await loginApi(values)
 
-    setSubmitting(false)
-    navigate('/dashboard')
+      // 登录前先清空旧的 profile，后续重新初始化
+      clearProfile()
+      setToken(res.data.token)
+      navigate('/dashboard')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -83,7 +87,7 @@ function Login() {
               管理后台登录
             </Typography.Title>
             <Typography.Text type="secondary">
-              当前阶段仅实现页面结构和交互，暂未接入真实接口。
+              使用演示账号登录后，将自动初始化当前用户的登录上下文数据。
             </Typography.Text>
           </Space>
 
@@ -99,7 +103,7 @@ function Login() {
             ))}
           </Space>
 
-          <Form<LoginFormValues>
+          <Form<LoginPayload>
             form={form}
             layout="vertical"
             initialValues={{

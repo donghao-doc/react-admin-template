@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { RouterProvider } from 'react-router-dom'
 
+import { useInitProfile } from '@/hooks/init-profile'
 import router from '@/router'
 
 function AppLoading() {
@@ -8,6 +9,8 @@ function AppLoading() {
 }
 
 function App() {
+  useInitProfile()
+
   return (
     <Suspense fallback={<AppLoading />}>
       <RouterProvider router={router} />
