@@ -147,3 +147,44 @@ function handleFillAccount(account: DemoAccount) {
 
 - 项目已经具备经典管理后台的基础页面骨架。
 - 后续可以直接在布局层继续接入菜单权限、面包屑、头部用户区和主题切换。
+
+## 05. 完成认证状态骨架搭建
+
+### 解决的问题
+
+- 项目还没有统一的认证状态承载位置，后续无法稳定接入登录、登出、路由守卫和权限请求。
+- token 如果只散落在页面组件里，后续扩展到 `axios`、菜单权限和用户信息时会很快失控。
+
+### 实现方案
+
+- 在 `src/store/auth.ts` 中就近定义认证 store 的私有类型，避免把只在单个模块内使用的类型抽离到全局 `types` 目录。
+- 在 `src/store/auth.ts` 中基于 `Zustand` 实现认证 store，只承载 `token` 和最基础的认证行为。
+- 使用 `Zustand` 官方 `persist` 中间件持久化 token，避免手动读写 `localStorage`。
+
+### 关键代码片段
+
+```ts
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set) => ({
+      token: '',
+      setToken(token) {
+        set({ token })
+      },
+      clearToken() {
+        set({ token: '' })
+      },
+    }),
+    {
+      name: AUTH_TOKEN_STORAGE_KEY,
+      partialize: (state) => ({ token: state.token }),
+    },
+  ),
+)
+```
+
+### 当前收益
+
+- 项目已经具备统一的 token 状态入口。
+- `types` 目录可以继续保持“只放公共类型”的边界。
+- 后续接 mock 登录接口、请求拦截器和路由守卫时，可以直接复用当前 store 继续扩展。
