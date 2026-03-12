@@ -1,5 +1,5 @@
 import router from '@/router'
-import { useAuthStore } from '@/store'
+import { useAuthStore, useProfileStore } from '@/store'
 
 import type { RequestConfig } from './types'
 
@@ -17,6 +17,7 @@ export function shouldShowErrMsg(config?: RequestConfig) {
  */
 export function handleUnauthorized() {
   useAuthStore.getState().clearToken()
+  useProfileStore.getState().clearProfile()
 
   if (isRedirectingToLogin) {
     return

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
 import { useAuthStore, useProfileStore } from '@/store'
+import type { MenuItem } from '@/types'
 
 interface RouteGuardProps {
   children: ReactNode
@@ -12,6 +13,19 @@ interface RouteGuardProps {
  */
 function GuardLoading() {
   return <div>页面加载中...</div>
+}
+
+/**
+ * 拍平菜单树中的叶子节点，仅保留实际可访问的菜单页面
+ */
+function flattenLeafMenus(menus: MenuItem[]): MenuItem[] {
+  return menus.flatMap((menu) => {
+    if (!menu.children?.length) {
+      return [menu]
+    }
+
+    return flattenLeafMenus(menu.children)
+  })
 }
 
 /**
@@ -51,6 +65,26 @@ export function PublicRoute({ children }: RouteGuardProps) {
 
   if (token && (profileStatus === 'idle' || profileStatus === 'loading')) {
     return <GuardLoading />
+  }
+
+  return <>{children}</>
+}
+
+/**
+ * 切换账号后，防止历史 patch 过的路由继续被访问
+ */
+export function MenuRouteAccess({
+  children,
+  path,
+}: {
+  children: ReactNode
+  path: string
+}) {
+  const menus = useProfileStore((state) => state.menus)
+  const menuPathSet = new Set(flattenLeafMenus(menus).map((menu) => menu.path))
+
+  if (!menuPathSet.has(path)) {
+    return <Navigate replace to="/404" />
   }
 
   return <>{children}</>
