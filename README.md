@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# React Admin Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+这是一个基于 `React + TypeScript + Vite + Ant Design` 的管理后台模板项目，目标是把管理后台关键且常见的框架层能力做好，让其他项目可以在这套模板基础上直接进行业务开发（也可以根据需要对框架进行改造），而不是重复处理登录、权限、路由、请求封装、主题、国际化等基础工作。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Vite、React 19、TypeScript、React Router、Zustand、Ant Design、Axios、i18n、Mock.js。
 
-## React Compiler
+## 当前已完成的核心能力
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+> 数据和接口都是 mockjs 生成的。
 
-## Expanding the ESLint configuration
+### 登录流程
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+登录接口获取 token 并持久化，在 App.tsx 根据 token 调接口获取用户信息、菜单树、按钮权限等数据，刷新页面可以重新获取。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 菜单权限、路由权限
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+接口返回用户可访问的菜单树，前端根据菜单树使用 `router.patchRoutes()` 动态生成路由。
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 按钮权限
+
+封装了全局的 `PermissionButton`，根据权限码（如 `system:user:delete`）控制按钮是否展示。
+
+### 路由守卫
+
+未登录时跳转登录页，已登录不应继续停留在登录页。
+
+### `axios` 二次封装
+
+请求拦截器携带 token，响应拦截器统一处理错误提示（可选）、登录失效等逻辑。
+
+### 其他
+
+经典后台布局、面包屑、light/dark 主题切换、国际化等。
+
+## 目录结构
+
+```text
+├── mock                     # mock 接口与数据
+├── src
+│   ├── api                  # 接口调用方法
+│   ├── assets               # 静态资源与全局主题变量
+│   ├── components           # 公共组件
+│   ├── hooks                # 初始化与通用 hooks
+│   ├── http                 # axios 封装
+│   ├── i18n                 # 国际化配置与语言资源
+│   ├── layout               # 后台布局
+│   ├── pages                # 页面组件
+│   ├── router               # 路由与守卫
+│   ├── store                # Zustand 状态管理
+│   └── types                # 公共类型定义
+└── .github/workflows        # GitHub Pages 部署工作流
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 部署说明
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 路由模式
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+为了部署到 GitHub Pages，采用了 `createHashRouter` 路由，以避免 GitHub Pages（纯静态托管环境）在刷新子路由时返回服务器 404。
+
+### mock
+
+- 本地开发时可以在浏览器 `Network` 中看到接口请求。
+- GitHub Pages 查看时，不依赖真实后端也可以完成登录和权限演示（虽然 `Network` 中看不到请求）。
