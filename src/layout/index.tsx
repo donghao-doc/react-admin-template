@@ -1,6 +1,8 @@
 import {
   DownOutlined,
   LogoutOutlined,
+  MoonOutlined,
+  SunOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography } from 'antd'
@@ -189,15 +191,12 @@ function AdminLayout() {
           )}
 
           <Space className="admin-layout__header-actions" size={16}>
-            <Space size={8}>
-              <Typography.Text>深色模式</Typography.Text>
-              <Switch
-                checked={themeMode === 'dark'}
-                checkedChildren="开"
-                unCheckedChildren="关"
-                onChange={(checked) => setThemeMode(checked ? 'dark' : 'light')}
-              />
-            </Space>
+            <Switch
+              checked={themeMode === 'dark'}
+              checkedChildren={<MoonOutlined />}
+              unCheckedChildren={<SunOutlined />}
+              onChange={(checked) => setThemeMode(checked ? 'dark' : 'light')}
+            />
 
             <Dropdown
               menu={{
