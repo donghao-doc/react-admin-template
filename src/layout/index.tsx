@@ -1,18 +1,22 @@
 import {
   DownOutlined,
+  GlobalOutlined,
   LogoutOutlined,
   MoonOutlined,
   SunOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography } from 'antd'
+import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Select, Space, Switch, Typography } from 'antd'
 import type { MenuProps } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
+import { LANGUAGE_OPTIONS } from '@/i18n'
 import { useAuthStore, useProfileStore, useThemeStore } from '@/store'
 import type { MenuItem } from '@/types'
 
 import { menuIconMap } from './menu-icons'
+import { getMenuTitle } from './menu-title'
 import './index.scss'
 
 const { Header, Sider, Content } = Layout
@@ -20,12 +24,15 @@ const { Header, Sider, Content } = Layout
 /**
  * 将后端返回的菜单树转换为 antd Menu 的数据结构
  */
-function transformMenuItems(menus: MenuItem[]): MenuProps['items'] {
+function transformMenuItems(
+  menus: MenuItem[],
+  t: (key: string) => string,
+): MenuProps['items'] {
   return menus.map((menu) => ({
     key: menu.path,
     icon: menu.meta.icon ? menuIconMap[menu.meta.icon] : undefined,
-    label: menu.meta.title,
-    children: menu.children?.length ? transformMenuItems(menu.children) : undefined,
+    label: getMenuTitle(menu.path, menu.meta.title, t),
+    children: menu.children?.length ? transformMenuItems(menu.children, t) : undefined,
   }))
 }
 
@@ -108,6 +115,7 @@ function findBreadcrumbTrail(
 }
 
 function AdminLayout() {
+  const { i18n, t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const { modal } = AntdApp.useApp()
@@ -120,13 +128,14 @@ function AdminLayout() {
   const matchedMenu = findMatchedMenu(location.pathname, menus)
   const openKeys = findOpenKeys(location.pathname, menus)
   const breadcrumbTrail = findBreadcrumbTrail(location.pathname, menus)
-  const menuItems = transformMenuItems(menus)
+  const menuItems = transformMenuItems(menus, t)
+  const currentLanguage = i18n.resolvedLanguage ?? i18n.language
 
   const userDropdownItems: MenuProps['items'] = [
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: t('auth.logout'),
     },
   ]
 
@@ -135,10 +144,10 @@ function AdminLayout() {
    */
   function handleLogout() {
     modal.confirm({
-      title: '确认退出登录？',
-      content: '退出后将返回登录页，需要重新登录才能继续访问后台。',
-      okText: '确认退出',
-      cancelText: '取消',
+      title: t('auth.logoutConfirmTitle'),
+      content: t('auth.logoutConfirmContent'),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
       onOk: () => {
         clearToken()
         clearProfile()
@@ -161,10 +170,10 @@ function AdminLayout() {
       <Sider className="admin-layout__sider" width={220}>
         <div className="admin-layout__brand">
           <Typography.Title className="admin-layout__brand-title" level={4}>
-            Admin Template
+            {t('app.title')}
           </Typography.Title>
           <Typography.Text className="admin-layout__brand-text" type="secondary">
-            React 管理后台模板
+            {t('app.subtitle')}
           </Typography.Text>
         </div>
 
@@ -185,12 +194,21 @@ function AdminLayout() {
             <Breadcrumb
               className="admin-layout__breadcrumb"
               items={breadcrumbTrail.map((menu) => ({
-                title: menu.meta.title,
+                title: getMenuTitle(menu.path, menu.meta.title, t),
               }))}
             />
           )}
 
           <Space className="admin-layout__header-actions" size={16}>
+            <Select
+              className="admin-layout__locale-select"
+              options={LANGUAGE_OPTIONS as unknown as { label: string; value: string }[]}
+              prefix={<GlobalOutlined />}
+              size="small"
+              value={currentLanguage}
+              onChange={(language) => i18n.changeLanguage(language)}
+            />
+
             <Switch
               checked={themeMode === 'dark'}
               checkedChildren={<MoonOutlined />}
@@ -207,7 +225,7 @@ function AdminLayout() {
             >
               <Space className="admin-layout__user" size={8}>
                 <Avatar icon={<UserOutlined />} />
-                <Typography.Text>{userInfo?.nickname ?? '未登录'}</Typography.Text>
+                <Typography.Text>{userInfo?.nickname ?? t('auth.loggedOut')}</Typography.Text>
                 <DownOutlined />
               </Space>
             </Dropdown>
