@@ -4,6 +4,7 @@ import axios, {
   AxiosHeaders,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import i18n from '@/i18n'
 
 import { useAuthStore } from '@/store'
 import type { ApiResponse } from '@/types'
@@ -89,7 +90,7 @@ http.interceptors.response.use(
       }
 
       const responseData = error.response.data
-      const errorMessage = responseData?.message || error.message || '请求失败'
+      const errorMessage = responseData?.message || error.message || i18n.t('http.requestFailed')
       message.error(errorMessage)
       return Promise.reject(error)
     }
@@ -97,13 +98,13 @@ http.interceptors.response.use(
     // 有 request 但没有 response，说明请求已经发出，但没有收到任何响应
     // 常见于断网、超时、跨域拦截等网络层问题
     if (error.request) {
-      message.error('网络异常，请稍后重试')
+      message.error(i18n.t('http.networkError'))
       return Promise.reject(error)
     }
 
     // 既没有 response，也没有 request
     // 通常说明错误发生在“请求真正发出之前”，例如配置错误、参数处理异常等
-    message.error(error.message || '未知错误')
+    message.error(error.message || i18n.t('http.unknownError'))
     return Promise.reject(error)
   },
 )
