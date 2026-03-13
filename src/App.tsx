@@ -2,13 +2,10 @@ import { Suspense, useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { App as AntdApp, ConfigProvider, theme as antdTheme } from 'antd'
 
+import AppLoading from '@/components/app-loading'
 import { useInitProfile, useInitTheme } from '@/hooks'
 import { useAuthStore, useProfileStore } from '@/store'
 import router, { addMenuRoutes } from '@/router'
-
-function AppLoading() {
-  return <div>页面加载中...</div>
-}
 
 function App() {
   useInitProfile()
@@ -34,9 +31,9 @@ function App() {
    * 这样刷新页面或直接输入动态路由地址时，不会走到 404
    */
   const appContent = token && !isRoutesReady
-    ? <AppLoading />
+    ? <AppLoading fullscreen />
     : (
-        <Suspense fallback={<AppLoading />}>
+        <Suspense fallback={<AppLoading fullscreen />}>
           <RouterProvider router={router} />
         </Suspense>
       )

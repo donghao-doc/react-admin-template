@@ -620,3 +620,21 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 
 - 当前项目已经在根组件挂载了 `Ant Design App` 容器。
 - 组件内需要使用 `modal / message / notification` 时，后续可以直接基于 `App.useApp()` 扩展，不需要再改应用入口结构。
+
+## 26. 收敛全局页面加载态组件
+
+### 解决的问题
+
+- `App.tsx` 和路由守卫里都各自维护了一份“页面加载中...”占位，表现不统一，也不便于后续统一升级样式。
+- 当前模板已经接入 `Ant Design`，继续用纯文本加载提示会显得过于简陋。
+
+### 实现方案
+
+- 新增通用 `AppLoading` 组件，统一使用 `Ant Design Spin` 渲染加载态。
+- 组件支持 `fullscreen` 模式，用于应用初始化和路由守卫这类全屏等待场景。
+- `App.tsx` 和 `router/guard.tsx` 全部改为复用同一个加载组件，避免继续重复定义。
+
+### 当前收益
+
+- 当前项目的应用初始化和路由守卫加载态已经统一。
+- 后续如果要继续调整加载文案、动画或布局，只需要维护一个公共组件。

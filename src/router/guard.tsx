@@ -1,18 +1,12 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
+import AppLoading from '@/components/app-loading'
 import { useAuthStore, useProfileStore } from '@/store'
 import type { MenuItem } from '@/types'
 
 interface RouteGuardProps {
   children: ReactNode
-}
-
-/**
- * 用户数据初始化期间的加载态
- */
-function GuardLoading() {
-  return <div>页面加载中...</div>
 }
 
 /**
@@ -45,7 +39,7 @@ export function ProtectedRoute({ children }: RouteGuardProps) {
   }
 
   if (profileStatus === 'idle' || profileStatus === 'loading') {
-    return <GuardLoading />
+    return <AppLoading fullscreen />
   }
 
   return <>{children}</>
@@ -64,7 +58,7 @@ export function PublicRoute({ children }: RouteGuardProps) {
   }
 
   if (token && (profileStatus === 'idle' || profileStatus === 'loading')) {
-    return <GuardLoading />
+    return <AppLoading fullscreen />
   }
 
   return <>{children}</>
@@ -105,11 +99,11 @@ export function RouteAccessFallback({ knownRoutePaths }: { knownRoutePaths: stri
   const isKnownRoute = knownRoutePaths.includes(pathname)
 
   if (profileStatus === 'idle' || profileStatus === 'loading') {
-    return <GuardLoading />
+    return <AppLoading fullscreen />
   }
 
   if (isKnownRoute && menuPathSet.has(pathname)) {
-    return <GuardLoading />
+    return <AppLoading fullscreen />
   }
 
   if (isKnownRoute) {
