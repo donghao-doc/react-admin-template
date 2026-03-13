@@ -1,4 +1,5 @@
 import { Flex, Spin } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 import './index.scss'
 
@@ -8,16 +9,18 @@ interface AppLoadingProps {
 }
 
 function AppLoading({
-  description = '页面加载中...',
+  description,
   fullscreen = false,
 }: AppLoadingProps) {
+  const { t } = useTranslation()
+
   return (
     <Flex
       align="center"
       className={`app-loading${fullscreen ? ' app-loading--fullscreen' : ''}`}
       justify="center"
     >
-      <Spin description={description} size="large" />
+      <Spin description={description ?? t('common.loading')} size="large" />
     </Flex>
   )
 }
