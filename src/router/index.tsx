@@ -74,18 +74,14 @@ const router = createBrowserRouter([
         element: <Navigate replace to="/dashboard" />,
       },
       {
-        path: '403',
-        element: <Forbidden />,
-      },
-      {
         path: 'dashboard',
         element: <Dashboard />,
       },
-      {
-        path: '*',
-        element: <RouteAccessFallback knownRoutePaths={knownRoutePaths} />,
-      },
     ],
+  },
+  {
+    path: '/403',
+    element: <Forbidden />,
   },
   {
     path: '/login',
@@ -101,7 +97,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate replace to="/404" />,
+    element: <RouteAccessFallback knownRoutePaths={knownRoutePaths} />,
   },
 ])
 
