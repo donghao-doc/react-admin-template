@@ -1,12 +1,12 @@
 import {
   DownOutlined,
-  GlobalOutlined,
   LogoutOutlined,
   MoonOutlined,
   SunOutlined,
+  TranslationOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Select, Space, Switch, Typography } from 'antd'
+import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -131,6 +131,11 @@ function AdminLayout() {
   const menuItems = transformMenuItems(menus, t)
   const currentLanguage = i18n.resolvedLanguage ?? i18n.language
 
+  const localeDropdownItems: MenuProps['items'] = LANGUAGE_OPTIONS.map((option) => ({
+    key: option.value,
+    label: option.label,
+  }))
+
   const userDropdownItems: MenuProps['items'] = [
     {
       key: 'logout',
@@ -200,14 +205,19 @@ function AdminLayout() {
           )}
 
           <Space className="admin-layout__header-actions" size={16}>
-            <Select
-              className="admin-layout__locale-select"
-              options={LANGUAGE_OPTIONS as unknown as { label: string; value: string }[]}
-              prefix={<GlobalOutlined />}
-              size="small"
-              value={currentLanguage}
-              onChange={(language) => i18n.changeLanguage(language)}
-            />
+            <Dropdown
+              menu={{
+                items: localeDropdownItems,
+                selectable: true,
+                selectedKeys: [currentLanguage],
+                onClick: ({ key }) => i18n.changeLanguage(key),
+              }}
+              trigger={['click']}
+            >
+              <Typography.Text className="admin-layout__locale-trigger">
+                <TranslationOutlined />
+              </Typography.Text>
+            </Dropdown>
 
             <Switch
               checked={themeMode === 'dark'}
