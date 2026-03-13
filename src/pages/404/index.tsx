@@ -1,9 +1,11 @@
 import { Button, Result, Space } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import './index.scss'
 
 function NotFound() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -11,14 +13,14 @@ function NotFound() {
       <Result
         status="404"
         title="404"
-        subTitle="抱歉，你访问的页面不存在或已被移除。"
+        subTitle={t('exception.notFound')}
         extra={(
           <Space>
             <Button type="primary" onClick={() => navigate('/dashboard')}>
-              返回首页
+              {t('common.backHome')}
             </Button>
             <Button onClick={() => navigate('/login')}>
-              去登录页
+              {t('common.goLogin')}
             </Button>
           </Space>
         )}
