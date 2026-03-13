@@ -3,13 +3,15 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-do
 
 import type { MenuItem } from '@/types'
 
-import { MenuRouteAccess, ProtectedRoute, PublicRoute } from './guard'
+import { MenuRouteAccess, ProtectedRoute, PublicRoute, RouteAccessFallback } from './guard'
 import { routeComponentMap } from './route-map'
 
 const AdminLayout = lazy(() => import('@/layout'))
+const Forbidden = lazy(() => import('@/pages/403'))
 const Login = lazy(() => import('@/pages/login'))
 const NotFound = lazy(() => import('@/pages/404'))
 const Dashboard = routeComponentMap['/dashboard']
+const knownRoutePaths = Object.keys(routeComponentMap)
 
 /**
  * 后台布局根路由 id，用于后续通过 patchRoutes 动态追加子路由
@@ -72,8 +74,16 @@ const router = createBrowserRouter([
         element: <Navigate replace to="/dashboard" />,
       },
       {
+        path: '403',
+        element: <Forbidden />,
+      },
+      {
         path: 'dashboard',
         element: <Dashboard />,
+      },
+      {
+        path: '*',
+        element: <RouteAccessFallback knownRoutePaths={knownRoutePaths} />,
       },
     ],
   },

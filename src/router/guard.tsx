@@ -84,8 +84,37 @@ export function MenuRouteAccess({
   const menuPathSet = new Set(flattenLeafMenus(menus).map((menu) => menu.path))
 
   if (!menuPathSet.has(path)) {
-    return <Navigate replace to="/404" />
+    return <Navigate replace to="/403" />
   }
 
   return <>{children}</>
+}
+
+/**
+ * 后台布局下的兜底路由：
+ * 1. 已知页面但当前账号无权访问时跳转 403
+ * 2. 未知页面继续跳转 404
+ * 3. 已知且有权限的动态路由在 patch 完成前先展示加载态
+ */
+export function RouteAccessFallback({ knownRoutePaths }: { knownRoutePaths: string[] }) {
+  const location = useLocation()
+  const menus = useProfileStore((state) => state.menus)
+  const profileStatus = useProfileStore((state) => state.profileStatus)
+  const menuPathSet = new Set(flattenLeafMenus(menus).map((menu) => menu.path))
+  const pathname = location.pathname
+  const isKnownRoute = knownRoutePaths.includes(pathname)
+
+  if (profileStatus === 'idle' || profileStatus === 'loading') {
+    return <GuardLoading />
+  }
+
+  if (isKnownRoute && menuPathSet.has(pathname)) {
+    return <GuardLoading />
+  }
+
+  if (isKnownRoute) {
+    return <Navigate replace to="/403" />
+  }
+
+  return <Navigate replace to="/404" />
 }
