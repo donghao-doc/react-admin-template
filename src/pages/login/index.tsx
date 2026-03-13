@@ -1,5 +1,5 @@
 import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Card, Checkbox, Form, Input, Space, Typography } from 'antd'
+import { App as AntdApp, Button, Card, Checkbox, Form, Input, Space, Typography } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -41,6 +41,7 @@ const demoAccounts: DemoAccount[] = [
 ]
 
 function Login() {
+  const { message } = AntdApp.useApp()
   const navigate = useNavigate()
   const [form] = Form.useForm<LoginPayload>()
   const [submitting, setSubmitting] = useState(false)
@@ -72,6 +73,7 @@ function Login() {
       // 登录前先清空旧的 profile，后续重新初始化
       clearProfile()
       setToken(res.data.token)
+      message.success('登录成功')
       navigate('/dashboard')
     } finally {
       setSubmitting(false)
