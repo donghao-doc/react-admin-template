@@ -1,6 +1,7 @@
 import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button, Card, Checkbox, Form, Input, Space, Typography } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { loginApi } from '@/api'
@@ -22,19 +23,19 @@ interface DemoAccount {
 const demoAccounts: DemoAccount[] = [
   {
     key: 'admin',
-    label: '超级管理员',
+    label: 'accountAdmin',
     username: 'admin',
     password: '123456',
   },
   {
     key: 'editor',
-    label: '内容运营',
+    label: 'accountEditor',
     username: 'editor',
     password: '123456',
   },
   {
     key: 'visitor',
-    label: '只读访客',
+    label: 'accountVisitor',
     username: 'visitor',
     password: '123456',
   },
@@ -42,6 +43,7 @@ const demoAccounts: DemoAccount[] = [
 
 function Login() {
   const { message } = AntdApp.useApp()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [form] = Form.useForm<LoginPayload>()
   const [submitting, setSubmitting] = useState(false)
@@ -73,7 +75,7 @@ function Login() {
       // 登录前先清空旧的 profile，后续重新初始化
       clearProfile()
       setToken(res.data.token)
-      message.success('登录成功')
+      message.success(t('auth.loginSuccess'))
       navigate('/dashboard')
     } finally {
       setSubmitting(false)
@@ -86,10 +88,10 @@ function Login() {
         <Space className="login-page__content" orientation="vertical" size={24}>
           <Space orientation="vertical" size={8}>
             <Typography.Title className="login-page__title" level={3}>
-              管理后台登录
+              {t('auth.pageTitle')}
             </Typography.Title>
             <Typography.Text type="secondary">
-              使用演示账号登录后，将自动初始化当前用户的登录上下文数据。
+              {t('auth.pageSubtitle')}
             </Typography.Text>
           </Space>
 
@@ -100,7 +102,7 @@ function Login() {
                 type={activeAccountKey === account.key ? 'primary' : 'default'}
                 onClick={() => handleFillAccount(account)}
               >
-                {account.label}
+                {t(`auth.${account.label}`)}
               </Button>
             ))}
           </Space>
@@ -116,30 +118,30 @@ function Login() {
             onFinish={handleSubmit}
           >
             <Form.Item
-              label="账号"
+              label={t('auth.username')}
               name="username"
-              rules={[{ required: true, message: '请输入登录账号' }]}
+              rules={[{ required: true, message: t('auth.usernameRequired') }]}
             >
               <Input
                 allowClear
                 prefix={<UserOutlined />}
-                placeholder="请输入账号"
+                placeholder={t('auth.usernamePlaceholder')}
               />
             </Form.Item>
 
             <Form.Item
-              label="密码"
+              label={t('auth.password')}
               name="password"
-              rules={[{ required: true, message: '请输入登录密码' }]}
+              rules={[{ required: true, message: t('auth.passwordRequired') }]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
-                placeholder="请输入密码"
+                placeholder={t('auth.passwordPlaceholder')}
               />
             </Form.Item>
 
             <Form.Item name="remember" valuePropName="checked">
-              <Checkbox>记住我</Checkbox>
+              <Checkbox>{t('auth.rememberMe')}</Checkbox>
             </Form.Item>
 
             <Form.Item className="login-page__submit">
@@ -150,7 +152,7 @@ function Login() {
                 loading={submitting}
                 type="primary"
               >
-                登录
+                {t('auth.submit')}
               </Button>
             </Form.Item>
           </Form>
