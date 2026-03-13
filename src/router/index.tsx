@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom'
+import { createHashRouter, Navigate, type RouteObject } from 'react-router-dom'
 
 import type { MenuItem } from '@/types'
 
@@ -59,7 +59,7 @@ function createMenuRoutes(menus: MenuItem[], seen: Set<string> = registeredPaths
     })
 }
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     id: ROOT_ROUTE_ID,
     path: '/',

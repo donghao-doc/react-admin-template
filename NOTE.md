@@ -658,3 +658,23 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 
 - 当前模板已经具备可用的中英文切换能力。
 - Ant Design 组件和框架层自定义文案已经能在同一套语言环境下保持一致。
+
+## 28. 适配 GitHub Pages 静态部署
+
+### 解决的问题
+
+- GitHub Pages 只提供静态文件托管，当前项目直接部署会同时遇到三个问题：资源路径 `base` 不正确、`BrowserRouter` 刷新子路由会 404、生产环境没有本地 mock 服务导致登录链路失效。
+
+### 实现方案
+
+- 在 `vite.config.ts` 中根据 `VITE_DEPLOY_TARGET=github-pages` 自动切换 `base`，并优先读取 Actions 提供的 `GITHUB_REPOSITORY` 推导仓库名。
+- 进一步收敛为环境变量驱动：开发环境和 GitHub Pages 分别通过不同 `.env` 文件声明 `VITE_PUBLIC_BASE`，让 `vite.config.ts` 直接读取，不再在配置文件里推导仓库名。
+- 在路由层按部署目标切换为 `createHashRouter`，避免 GitHub Pages 对子路径刷新返回静态 404。
+- 在 `main.tsx` 中仅对 GitHub Pages 生产构建启用 `vite-plugin-mock/client` 的浏览器端生产 mock，让演示站点继续可登录、可获取 profile。
+- 新增 GitHub Actions 工作流，按 Vite 官方推荐方式构建并发布到 Pages。
+- 将 `mock` 目录纳入 `tsconfig.app.json`，确保生产构建时可正确打包浏览器端 mock 所需模块。
+
+### 当前收益
+
+- 当前项目已经具备部署到 GitHub Pages 的基础条件。
+- 本地开发仍然保持现有体验，只有 GitHub Pages 构建才会切到对应的 `base`、`HashRouter` 和生产 mock 模式。
