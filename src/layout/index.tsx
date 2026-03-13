@@ -3,7 +3,7 @@ import {
   LogoutOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Avatar, Dropdown, Layout, Menu, Modal, Space, Typography } from 'antd'
+import { Avatar, Breadcrumb, Dropdown, Layout, Menu, Modal, Space, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -78,6 +78,33 @@ function findOpenKeys(pathname: string, menus: MenuItem[], parentPaths: string[]
   return []
 }
 
+/**
+ * 根据当前路由生成面包屑
+ */
+function findBreadcrumbTrail(
+  pathname: string,
+  menus: MenuItem[],
+  parentMenus: MenuItem[] = [],
+): MenuItem[] {
+  for (const menu of menus) {
+    const currentTrail = [...parentMenus, menu]
+
+    if (pathname === menu.path) {
+      return currentTrail
+    }
+
+    if (menu.children?.length) {
+      const childTrail = findBreadcrumbTrail(pathname, menu.children, currentTrail)
+
+      if (childTrail.length) {
+        return childTrail
+      }
+    }
+  }
+
+  return []
+}
+
 function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -87,6 +114,7 @@ function AdminLayout() {
   const menus = useProfileStore((state) => state.menus)
   const matchedMenu = findMatchedMenu(location.pathname, menus)
   const openKeys = findOpenKeys(location.pathname, menus)
+  const breadcrumbTrail = findBreadcrumbTrail(location.pathname, menus)
   const menuItems = transformMenuItems(menus)
 
   const userDropdownItems: MenuProps['items'] = [
@@ -148,9 +176,14 @@ function AdminLayout() {
 
       <Layout>
         <Header className="admin-layout__header">
-          <Typography.Title className="admin-layout__header-title" level={5}>
-            {matchedMenu?.meta.title ?? '管理后台'}
-          </Typography.Title>
+          {breadcrumbTrail.length > 0 && (
+            <Breadcrumb
+              className="admin-layout__breadcrumb"
+              items={breadcrumbTrail.map((menu) => ({
+                title: menu.meta.title,
+              }))}
+            />
+          )}
 
           <Dropdown
             menu={{
