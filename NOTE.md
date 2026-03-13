@@ -562,10 +562,61 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 ### 实现方案
 
 - 在布局层基于当前 `menus` 和 `location.pathname` 递归查找当前页面对应的菜单链路。
-- 使用 `Ant Design Breadcrumb` 渲染面包屑，并让非最后一级节点支持点击跳转。
+- 使用 `Ant Design Breadcrumb` 渲染面包屑，先保留纯展示形态，避免在模板早期引入额外跳转交互。
 - 保持实现集中在布局文件中，避免为了这一功能继续拆分更多文件。
 
 ### 当前收益
 
 - 当前页面的层级关系已经能通过面包屑展示出来。
-- 多级页面可以通过面包屑快速返回上级菜单，后台布局体验更完整。
+- 后台布局已经具备常见的路径层级提示，页面结构更清晰。
+
+## 24. 接入全局主题切换
+
+### 解决的问题
+
+- 当前模板只有单一浅色视觉，缺少后台项目常见的 light / dark 主题切换能力。
+- 如果主题状态只放在布局组件里，后续登录页、异常页和更多全局组件无法共享同一套主题模式。
+
+### 实现方案
+
+- 新增 `theme store`，使用 `Zustand persist` 持久化 `themeMode`，保证刷新页面后继续保留用户选择。
+- 在 `App.tsx` 中统一接入 `Ant Design ConfigProvider`，根据 `themeMode` 切换 `defaultAlgorithm` 和 `darkAlgorithm`。
+- 同时将主题模式同步到根节点 `data-theme`，让项目自己的布局背景、边框和文本颜色也能通过 CSS 变量统一响应。
+- 在布局 Header 中使用 `Switch` 提供主题切换入口，交互保持简单直接。
+
+### 关键代码片段
+
+```tsx
+<ConfigProvider
+  theme={{
+    algorithm: themeMode === 'dark'
+      ? antdTheme.darkAlgorithm
+      : antdTheme.defaultAlgorithm,
+  }}
+>
+  <RouterProvider router={router} />
+</ConfigProvider>
+```
+
+### 当前收益
+
+- 当前模板已经具备基础的浅色 / 深色主题切换能力。
+- 主题状态是全局共享且可持久化的，后续继续覆盖登录页、异常页和更多页面时不需要推倒重来。
+
+## 25. 挂载 Ant Design App 全局容器
+
+### 解决的问题
+
+- 当前项目虽然已经接入 `ConfigProvider` 和动态主题，但 `http` 层仍然在使用 `message.error` 静态方法，无法稳定消费主题上下文。
+- 如果后续还要在组件外模块里统一调用 `message`、`modal`、`notification`，缺少一个可靠的全局实例承载点。
+
+### 实现方案
+
+- 在 `App.tsx` 中引入 `Ant Design App` 组件，放在 `ConfigProvider` 内层，作为全局反馈实例的统一容器。
+- 当前先只在组件内消费 `App.useApp()`，例如布局里的退出确认弹窗直接使用 `modal` 实例。
+- 组件外模块如 `http` 层，暂时仍保持静态 `message` 用法，避免在模板早期引入额外桥接复杂度。
+
+### 当前收益
+
+- 当前项目已经在根组件挂载了 `Ant Design App` 容器。
+- 组件内需要使用 `modal / message / notification` 时，后续可以直接基于 `App.useApp()` 扩展，不需要再改应用入口结构。

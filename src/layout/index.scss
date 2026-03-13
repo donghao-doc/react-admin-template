@@ -1,25 +1,29 @@
 .admin-layout {
   min-height: 100vh;
+  background: var(--app-layout-bg);
 }
 
 .admin-layout__sider {
-  border-inline-end: 1px solid #f0f0f0;
+  background: var(--app-sider-bg) !important;
+  border-inline-end: 1px solid var(--app-border-color);
 }
 
 .admin-layout__brand {
   padding: 24px 20px;
+  background: var(--app-sider-bg);
 
   .admin-layout__brand-title {
     margin: 0;
-    color: #ffffff !important;
+    color: var(--app-sider-title-color) !important;
   }
 
   .admin-layout__brand-text {
-    color: rgba(255, 255, 255, 0.65) !important;
+    color: var(--app-sider-text-secondary) !important;
   }
 }
 
 .admin-layout__menu {
+  background: var(--app-sider-bg) !important;
   border-inline-end: none !important;
 }
 
@@ -29,12 +33,16 @@
   justify-content: space-between;
   height: 64px;
   padding: 0 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--app-surface-bg);
+  border-bottom: 1px solid var(--app-border-color);
 }
 
 .admin-layout__breadcrumb {
   font-size: 12px;
+}
+
+.admin-layout__header-actions {
+  color: var(--app-text-color);
 }
 
 .admin-layout__user {
@@ -43,7 +51,7 @@
 
 .admin-layout__content {
   padding: 24px;
-  background: #f5f7fa;
+  background: var(--app-layout-bg);
 
   .admin-layout__content-inner {
     min-height: calc(100vh - 112px);

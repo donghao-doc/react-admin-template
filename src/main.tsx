@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import 'normalize.css'
+import '@/assets/styles/theme.scss'
 import './index.scss'
 
 import App from './App.tsx'

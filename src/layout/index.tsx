@@ -3,11 +3,11 @@ import {
   LogoutOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Avatar, Breadcrumb, Dropdown, Layout, Menu, Modal, Space, Typography } from 'antd'
+import { App as AntdApp, Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuthStore, useProfileStore } from '@/store'
+import { useAuthStore, useProfileStore, useThemeStore } from '@/store'
 import type { MenuItem } from '@/types'
 
 import { menuIconMap } from './menu-icons'
@@ -108,10 +108,13 @@ function findBreadcrumbTrail(
 function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { modal } = AntdApp.useApp()
   const clearToken = useAuthStore((state) => state.clearToken)
   const clearProfile = useProfileStore((state) => state.clearProfile)
   const userInfo = useProfileStore((state) => state.userInfo)
   const menus = useProfileStore((state) => state.menus)
+  const themeMode = useThemeStore((state) => state.themeMode)
+  const setThemeMode = useThemeStore((state) => state.setThemeMode)
   const matchedMenu = findMatchedMenu(location.pathname, menus)
   const openKeys = findOpenKeys(location.pathname, menus)
   const breadcrumbTrail = findBreadcrumbTrail(location.pathname, menus)
@@ -129,7 +132,7 @@ function AdminLayout() {
    * 退出登录前进行二次确认，避免误操作
    */
   function handleLogout() {
-    Modal.confirm({
+    modal.confirm({
       title: '确认退出登录？',
       content: '退出后将返回登录页，需要重新登录才能继续访问后台。',
       okText: '确认退出',
@@ -169,7 +172,7 @@ function AdminLayout() {
           defaultOpenKeys={openKeys}
           mode="inline"
           selectedKeys={matchedMenu ? [matchedMenu.path] : []}
-          theme="dark"
+          theme={themeMode}
           onClick={({ key }) => navigate(key)}
         />
       </Sider>
@@ -185,19 +188,31 @@ function AdminLayout() {
             />
           )}
 
-          <Dropdown
-            menu={{
-              items: userDropdownItems,
-              onClick: handleUserMenuClick,
-            }}
-            trigger={['click']}
-          >
-            <Space className="admin-layout__user" size={8}>
-              <Avatar icon={<UserOutlined />} />
-              <Typography.Text>{userInfo?.nickname ?? '未登录'}</Typography.Text>
-              <DownOutlined />
+          <Space className="admin-layout__header-actions" size={16}>
+            <Space size={8}>
+              <Typography.Text>深色模式</Typography.Text>
+              <Switch
+                checked={themeMode === 'dark'}
+                checkedChildren="开"
+                unCheckedChildren="关"
+                onChange={(checked) => setThemeMode(checked ? 'dark' : 'light')}
+              />
             </Space>
-          </Dropdown>
+
+            <Dropdown
+              menu={{
+                items: userDropdownItems,
+                onClick: handleUserMenuClick,
+              }}
+              trigger={['click']}
+            >
+              <Space className="admin-layout__user" size={8}>
+                <Avatar icon={<UserOutlined />} />
+                <Typography.Text>{userInfo?.nickname ?? '未登录'}</Typography.Text>
+                <DownOutlined />
+              </Space>
+            </Dropdown>
+          </Space>
         </Header>
 
         <Content className="admin-layout__content">

@@ -17,6 +17,9 @@
 body {
   margin: 0;
   min-width: 320px;
+  background: var(--app-layout-bg);
+  color: var(--app-text-color);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #root {
