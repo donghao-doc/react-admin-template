@@ -1,4 +1,6 @@
-import { Button, Space, Typography } from 'antd'
+import { Space, Typography } from 'antd'
+
+import PermissionButton from '@/components/permission-button'
 
 function Dashboard() {
   return (
@@ -10,7 +12,9 @@ function Dashboard() {
 
       <div style={{ marginTop: 24 }}>
         <Space>
-          <Button type="primary">查看概览</Button>
+          <PermissionButton permissionCode="dashboard:view" type="primary">
+            查看概览
+          </PermissionButton>
         </Space>
       </div>
     </div>

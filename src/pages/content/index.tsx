@@ -1,4 +1,6 @@
-import { Button, Space, Typography } from 'antd'
+import { Space, Typography } from 'antd'
+
+import PermissionButton from '@/components/permission-button'
 
 function Content() {
   return (
@@ -10,8 +12,12 @@ function Content() {
 
       <div style={{ marginTop: 24 }}>
         <Space>
-          <Button type="primary">发布内容</Button>
-          <Button>查看列表</Button>
+          <PermissionButton permissionCode="content:publish" type="primary">
+            发布内容
+          </PermissionButton>
+          <PermissionButton permissionCode="content:view">
+            查看列表
+          </PermissionButton>
         </Space>
       </div>
     </div>

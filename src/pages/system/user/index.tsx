@@ -1,4 +1,6 @@
-import { Button, Space, Typography } from 'antd'
+import { Space, Typography } from 'antd'
+
+import PermissionButton from '@/components/permission-button'
 
 function SystemUser() {
   return (
@@ -10,9 +12,18 @@ function SystemUser() {
 
       <div style={{ marginTop: 24 }}>
         <Space>
-          <Button type="primary">新增用户</Button>
-          <Button>编辑用户</Button>
-          <Button danger>删除用户</Button>
+          <PermissionButton permissionCode="system:user:view">
+            查看用户
+          </PermissionButton>
+          <PermissionButton permissionCode="system:user:create" type="primary">
+            新增用户
+          </PermissionButton>
+          <PermissionButton permissionCode="system:user:edit">
+            编辑用户
+          </PermissionButton>
+          <PermissionButton danger permissionCode="system:user:delete">
+            删除用户
+          </PermissionButton>
         </Space>
       </div>
     </div>

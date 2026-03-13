@@ -533,3 +533,21 @@ export const mockMenusByRole: Record<UserRole, MenuItem[]> = {
 
 - 页面级权限不足和页面不存在已经能明确区分。
 - 对于后台项目中的已知页面，用户无权限访问时会得到更合理的 `403` 提示，而不是误导性地显示 `404`。
+
+## 22. 接入全局按钮权限组件
+
+### 解决的问题
+
+- 当前页面虽然已经补了测试按钮，但还没有真正使用 `profile.permissions` 控制显示。
+- 如果每个页面都手写权限判断，后续维护会变得分散，模板层也不够统一。
+
+### 实现方案
+
+- 新增全局 `PermissionButton` 组件，在组件内部统一读取 `profile store` 中的权限码。
+- `PermissionButton` 接收 `permissionCode`，无权限时直接不渲染，按钮其他属性继续透传给 `antd Button`。
+- 在 `dashboard`、`content`、`system/user` 页面中统一改为使用 `PermissionButton`，减少页面侧重复判断逻辑。
+
+### 当前收益
+
+- 当前项目已经具备全局可复用的按钮权限能力。
+- 不同账号登录后，页面内的操作按钮会根据 `permissions` 自动显示或隐藏，页面接入成本更低。
